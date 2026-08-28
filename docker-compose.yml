@@ -10,13 +10,12 @@ services:
     environment:
       APP_NAME: "${APP_NAME:-Laravel}"
       APP_ENV: "${APP_ENV:-local}"
-      APP_KEY: "${APP_KEY:?APP_KEY belum di-set di .env — jalankan php artisan key:generate}"
+      APP_KEY: "${APP_KEY:-}"
       APP_DEBUG: "${APP_DEBUG:-true}"
       APP_URL: "${APP_URL:-http://localhost:8001}"
       APP_TIMEZONE: "${APP_TIMEZONE:-Asia/Singapore}"
       LOG_CHANNEL: "${LOG_CHANNEL:-stack}"
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
-      # Database — host fiks `db` (nama service), bukan 127.0.0.1
       DB_CONNECTION: pgsql
       DB_HOST: db
       DB_PORT: 5432
@@ -24,19 +23,16 @@ services:
       DB_USERNAME: "${POSTGRES_USER:-postgres}"
       DB_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       DB_SSLMODE: "${DB_SSLMODE:-prefer}"
-      # Drivers ringan (file/sync/log) — aman untuk single-container
       SESSION_DRIVER: "${SESSION_DRIVER:-file}"
       CACHE_STORE: "${CACHE_STORE:-file}"
       QUEUE_CONNECTION: "${QUEUE_CONNECTION:-sync}"
       BROADCAST_CONNECTION: "${BROADCAST_CONNECTION:-log}"
       FILESYSTEM_DISK: "${FILESYSTEM_DISK:-local}"
-      # Vite HMR hanya untuk dev; di image self-contained sudah ada build
-      # Mail
       MAIL_MAILER: "${MAIL_MAILER:-log}"
       MAIL_FROM_ADDRESS: "${MAIL_FROM_ADDRESS:-hello@example.com}"
       MAIL_FROM_NAME: "${MAIL_FROM_NAME:-${APP_NAME}}"
-      # SLA
       SLA_APPROACH_THRESHOLD_MINUTES: "${SLA_APPROACH_THRESHOLD_MINUTES:-60}"
+      AUTO_MIGRATE: "${AUTO_MIGRATE:-true}"
     volumes:
       - ./storage:/var/www/html/storage
     depends_on:
@@ -56,7 +52,7 @@ services:
     environment:
       APP_NAME: "${APP_NAME:-Laravel}"
       APP_ENV: "${APP_ENV:-local}"
-      APP_KEY: "${APP_KEY:?APP_KEY belum di-set di .env}"
+      APP_KEY: "${APP_KEY:-}"
       APP_TIMEZONE: "${APP_TIMEZONE:-Asia/Singapore}"
       DB_CONNECTION: pgsql
       DB_HOST: db
@@ -85,7 +81,6 @@ services:
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      # 5433 di host agar tidak bentrok dengan PostgreSQL lokal di 5432
       - "${POSTGRES_HOST_PORT:-5433}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -95,6 +90,20 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    networks:
+      - app-net
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_HOST_PORT:-8081}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: pepa-linha
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - app-net
 

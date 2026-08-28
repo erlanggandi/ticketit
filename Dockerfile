@@ -47,8 +47,12 @@ COPY . .
 # Copy built assets from node stage
 COPY --from=assets /app/public/build ./public/build
 
-# Install PHP deps (no dev for smaller image; use --no-interaction)
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-progress \
+# Entrypoint untuk auto APP_KEY & migrate biar `compose up` langsung jalan
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Install PHP deps (include dev so Boost etc. available — image tetap bisa `APP_ENV=production`)
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader --no-progress \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
@@ -68,4 +72,5 @@ RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
     } > /usr/local/etc/php/conf.d/custom.ini
 
 EXPOSE 9000
+ENTRYPOINT ["entrypoint.sh"]
 CMD ["php-fpm"]

@@ -4,9 +4,12 @@ Panduan cepat untuk menjalankan `ticket-it-app` di VPS Ubuntu 22.04/24.04 dengan
 
 ## Arsitektur
 - `app` — `php:8.5-fpm` (Laravel) + `scheduler` (`php artisan schedule:work` untuk `tickets:check-sla`)
-- `db` — `postgres:18-alpine` volume `pgdata`
-- `nginx` — reverse ke `app:9000`, serve `public/`
+- `db` — `postgres:18-alpine` volume `pgdata` (`5433:5432` dev, tidak di-expose di prod)
+- `adminer` — DB admin di `8081:8080` (`ADMINER_DEFAULT_SERVER=db`)
+- `nginx` — reverse ke `app:9000`, serve `public/` (`8001:80` dev, `80:80` prod)
 - Env tidak di-bake ke image; di-injeksi via `environment` di `docker-compose.yml` dari `.env` server.
+- `docker/entrypoint.sh` auto-generate `APP_KEY` jika kosong & auto `migrate` (`AUTO_MIGRATE=true` dev), jadi `docker compose up --build` langsung jalan.
+- `docker-compose.override.yml` (dev) bind mount `.:/var/www/html` + volume `vendor`/`public_build` biar edit host langsung reflektif tanpa `composer install` di host.
 
 ## 1) Siapkan Server
 ```bash
@@ -81,14 +84,19 @@ echo "base64:$(openssl rand -base64 32)"
 
 ## 3) Build & Jalankan
 
-Dev / staging (expose DB di localhost, nginx 80):
+**Cukup `up` saja (auto APP_KEY + migrate):**
 ```bash
 docker compose up -d --build
-docker compose ps                    # tunggu db (healthy)
+docker compose ps                    # tunggu db (healthy) & app ready
+curl -I http://localhost:8001/       # 200
+# Adminer: http://localhost:8081  (System: PostgreSQL, Server: db, User: postgres, Password: postgres, DB: ticket_it_app)
+```
+
+Dev / staging manual (jika `AUTO_MIGRATE=false`):
+```bash
 docker compose exec app php artisan migrate --force
 docker compose exec app php artisan db:seed --force   # sekali saja
 docker compose exec app php artisan config:cache
-curl -I http://localhost/            # 200
 ```
 
 Production (DB tidak di-expose, prod env):
