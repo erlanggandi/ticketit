@@ -1,0 +1,39 @@
+# Production override — pakai bersama docker-compose.yml
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#   - DB tidak di-expose ke host (akses via docker exec saja)
+#   - Nginx di port 80 (ganti ke 443 jika sudah ada SSL)
+#   - APP_ENV=production, APP_DEBUG=false, LOG_LEVEL=warning
+
+services:
+  app:
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_LEVEL: warning
+      # Paksa URL produksi dari env server (override APP_URL di .env)
+      # APP_URL: "https://support.domain-anda.com"
+
+  scheduler:
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      LOG_LEVEL: warning
+
+  db:
+    # Jangan expose port PostgreSQL ke publik di produksi.
+    # Override dari compose utama (5433:5432) → kosongkan.
+    # Jika butuh akses pgAdmin via SSH tunnel, ganti ke ["127.0.0.1:5433:5432"]
+    ports: []
+    # Contoh batasi resource (opsional):
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G
+
+  nginx:
+    ports:
+      - "80:80"
+      # Uncomment jika sudah ada SSL (letakkan cert di docker/nginx/ssl/):
+      # - "443:443"
+    # volumes:
+    #   - ./docker/nginx/ssl:/etc/nginx/ssl:ro
