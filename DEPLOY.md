@@ -59,11 +59,22 @@ POSTGRES_HOST_PORT=127.0.0.1:5433  # dev saja; di prod override jadi kosong
 NGINX_HOST_PORT=80
 ```
 
-Generate `APP_KEY` (tanpa butuh PHP host):
+Generate `APP_KEY` — lakukan **setelah build** (butuh `vendor` di dalam image, belum ada di host fresh clone):
 ```bash
-docker run --rm -v $(pwd):/app php:8.5-cli php /app/artisan key:generate --show
-# copy output `base64:...` → paste ke APP_KEY di .env
-nano .env # APP_KEY=base64:...
+# 1) Build dulu (isi APP_KEY kosong tidak masalah untuk build)
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# 2) Generate key via container yang sudah punya vendor
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan key:generate --show
+# copy output `base64:...` → paste ke APP_KEY di .env di host
+nano .env  # APP_KEY=base64:...
+# 3) Restart agar app baca APP_KEY baru
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec app php artisan config:cache
+```
+Alternatif tanpa Docker (butuh `openssl` di host):
+```bash
+echo "base64:$(openssl rand -base64 32)"
+# paste ke APP_KEY
 ```
 
 > **PENTING:** Repo pernah bocorkan `.env` di commit `21c9afa`. Jangan reuse `APP_KEY` lama. Generate baru di server.
@@ -130,4 +141,5 @@ Opsi A — Certbot di host Nginx (klasik). Opsi B — pasang Caddy/Traefik di de
 - `target scheduler: failed to solve: apt-get ... exit code: 2` → sudah fixed (hapus `-j$(nproc)` di Dockerfile 2026-08-28).
 - `ports are not available: 8080/8000` → ganti `NGINX_HOST_PORT` di `.env` (dev pakai `8001`, prod pakai `80`).
 - `SQLSTATE[08006] no password supplied` → cek `POSTGRES_PASSWORD` == `DB_PASSWORD` di `.env`.
-- `APP_KEY not set` → generate ulang seperti langkah 2.
+- `APP_KEY not set` → generate ulang seperti langkah 2 (harus setelah `up --build`).
+- `failed opening required '/app/vendor/autoload.php'` → terjadi jika `docker run -v $(pwd):/app php:8.5-cli php /app/artisan ...` di fresh clone (vendor belum ada). Ikuti urutan baru di langkah 2: build dulu baru `exec app php artisan key:generate --show`.
