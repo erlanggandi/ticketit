@@ -1,0 +1,246 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource/public-sans/400.css';
+@import '@fontsource/public-sans/500.css';
+@import '@fontsource/public-sans/600.css';
+@import '@fontsource/public-sans/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+@import '@fontsource/ibm-plex-mono/600.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Archivo Variable', 'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+
+    /* Work-order docket palette */
+    --color-paper: #f4f4f1;
+    --color-sheet: #ffffff;
+    --color-ink: #171c2b;
+    --color-muted: #565d6e;
+    --color-faint: #9096a6;
+    --color-rule: #dedcd2;
+
+    /* Stamp blue — primer */
+    --color-stamp-50: #eef0fc;
+    --color-stamp-100: #dfe4fa;
+    --color-stamp-200: #c3ccf4;
+    --color-stamp-300: #a0adf0;
+    --color-stamp-400: #6a7ce4;
+    --color-stamp-500: #3d50da;
+    --color-stamp-600: #2438c8;
+    --color-stamp-700: #1b2aa0;
+    --color-stamp-800: #15227e;
+    --color-stamp-900: #101b60;
+
+    /* Signal orange — High / warning saja */
+    --color-signal-50: #fdf0e8;
+    --color-signal-100: #fae0cd;
+    --color-signal-300: #f4ab79;
+    --color-signal-400: #ef8a48;
+    --color-signal-500: #e8590c;
+    --color-signal-600: #cc4a05;
+    --color-signal-700: #a83c04;
+
+    /* Critical red — Critical / breach saja */
+    --color-critical-50: #fbebeb;
+    --color-critical-100: #f6dcdc;
+    --color-critical-300: #e29a9a;
+    --color-critical-400: #d94545;
+    --color-critical-500: #c81e1e;
+    --color-critical-600: #ad1a1a;
+    --color-critical-700: #8e1515;
+
+    /* OK green — resolved/done */
+    --color-ok-50: #e9f4ec;
+    --color-ok-100: #d5e9db;
+    --color-ok-300: #93c6a3;
+    --color-ok-400: #57a371;
+    --color-ok-500: #2e8652;
+    --color-ok-600: #1f6b3f;
+    --color-ok-700: #185532;
+
+    --shadow-card: 4px 4px 0 0 rgb(23 28 43 / 0.14);
+    --shadow-card-sm: 3px 3px 0 0 rgb(23 28 43 / 0.12);
+    --shadow-pop: 6px 6px 0 0 rgb(23 28 43 / 0.18);
+}
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        @apply bg-paper font-sans text-ink;
+        background-image: radial-gradient(rgb(23 28 43 / 0.045) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    ::selection {
+        @apply bg-stamp-600 text-white;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-stamp-600);
+        outline-offset: 2px;
+    }
+
+    dialog::backdrop {
+        background: rgb(23 28 43 / 0.55);
+        backdrop-filter: blur(2px);
+    }
+
+    dialog[open] {
+        animation: dialog-in .16s ease-out;
+    }
+
+    @keyframes dialog-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: .01ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: .01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    /* ---------- Lembar formulir ---------- */
+    .sheet {
+        @apply rounded-md border border-ink bg-sheet;
+        box-shadow: var(--shadow-card);
+    }
+
+    .sheet-flat {
+        @apply rounded-md border border-ink/70 bg-sheet;
+        box-shadow: var(--shadow-card-sm);
+    }
+
+    /* Strip kop dokumen terkontrol */
+    .kop {
+        @apply flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-ink px-5 py-2.5 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-muted sm:px-7;
+    }
+
+    /* ---------- Tombol stempel ---------- */
+    .btn {
+        @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-[5px] border font-semibold duration-100;
+        box-shadow: 2.5px 2.5px 0 0 var(--color-ink);
+    }
+
+    .btn:hover {
+        box-shadow: 1px 1px 0 0 var(--color-ink);
+        transform: translate(1.5px, 1.5px);
+    }
+
+    .btn:active {
+        box-shadow: 0 0 0 0 var(--color-ink);
+        transform: translate(2.5px, 2.5px);
+    }
+
+    .btn:disabled,
+    .btn.disabled {
+        @apply pointer-events-none opacity-55;
+    }
+
+    .btn:focus-visible {
+        outline: 2px solid var(--color-stamp-600);
+        outline-offset: 2px;
+    }
+
+    .btn-primary   { @apply border-stamp-700 bg-stamp-600 text-white hover:bg-stamp-700; }
+    .btn-secondary { @apply border-ink bg-sheet text-ink hover:bg-paper; }
+    .btn-dark      { @apply border-ink bg-ink text-white hover:bg-stamp-900; }
+    .btn-danger    { @apply border-critical-600 bg-critical-500 text-white hover:bg-critical-600; }
+
+    .btn-sm { @apply px-3 py-1.5 text-xs; }
+    .btn-md { @apply px-4 py-2 text-sm; }
+    .btn-lg { @apply px-5 py-2.5 text-[15px]; }
+
+    /* ---------- Formulir ---------- */
+    .label {
+        @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.12em] text-muted;
+    }
+
+    .field {
+        @apply block w-full rounded-[5px] border border-ink/25 bg-sheet px-3 py-2 text-sm text-ink placeholder:font-normal placeholder:text-faint focus:border-stamp-600 focus:outline-none focus:ring-2 focus:ring-stamp-600/20;
+    }
+
+    .field-error {
+        @apply border-critical-500 focus:border-critical-500 focus:ring-critical-500/15;
+    }
+
+    /* ---------- Cap status ---------- */
+    .chip {
+        @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-[3px] border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase leading-[1.4] tracking-[0.09em];
+    }
+
+    /* Cap besar (hero) — double-ring seperti cap karet */
+    .stamp-mark {
+        @apply inline-block rounded-[5px] border-[2.5px] px-4 py-1.5 text-center font-mono font-semibold uppercase tracking-[0.22em];
+        outline: 1.5px solid currentColor;
+        outline-offset: 3px;
+    }
+
+    /* ---------- Tipografi display ---------- */
+    .display {
+        @apply font-display font-black uppercase;
+        font-stretch: 118%;
+        letter-spacing: -0.005em;
+    }
+
+    .eyebrow {
+        @apply font-mono text-[11px] font-medium uppercase tracking-[0.22em] text-muted;
+    }
+
+    /* ---------- Perforasi / tepi sobekan ---------- */
+    .tear-bottom {
+        --tear-r: 6px;
+        --tear-gap: 22px;
+        -webkit-mask-image: radial-gradient(circle var(--tear-r) at calc(var(--tear-gap) / 2) 100%, transparent calc(var(--tear-r) - 0.5px), #000 var(--tear-r));
+        mask-image: radial-gradient(circle var(--tear-r) at calc(var(--tear-gap) / 2) 100%, transparent calc(var(--tear-r) - 0.5px), #000 var(--tear-r));
+        -webkit-mask-size: var(--tear-gap) 100%;
+        mask-size: var(--tear-gap) 100%;
+        -webkit-mask-repeat: repeat-x;
+        mask-repeat: repeat-x;
+        padding-bottom: calc(var(--tear-r) + 2px);
+    }
+
+    /* ---------- Barcode deterministik dari nomor tiket ---------- */
+    .barcode {
+        @apply flex h-10 items-stretch;
+    }
+
+    .barcode > span {
+        @apply inline-block bg-current;
+    }
+
+    /* ---------- Animasi momen karcis ---------- */
+    @keyframes stub-slide {
+        from { transform: translateY(-103%); }
+        to   { transform: translateY(0); }
+    }
+
+    .stub-anim {
+        animation: stub-slide .7s cubic-bezier(.2, .7, .25, 1) .15s backwards;
+    }
+
+    @keyframes stamp-hit {
+        0%   { opacity: 0; transform: rotate(7deg) scale(1.7); }
+        62%  { opacity: 1; transform: rotate(-5deg) scale(.94); }
+        80%  { transform: rotate(-4deg) scale(1.03); }
+        100% { opacity: 1; transform: rotate(-5deg) scale(1); }
+    }
+
+    .stamp-anim {
+        animation: stamp-hit .4s ease-out .8s backwards;
+    }
+}
