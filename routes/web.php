@@ -1,10 +1,14 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminManageController;
+use App\Http\Controllers\Admin\AiProviderSettingController;
+use App\Http\Controllers\Admin\AiSettingController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\AuthSettingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DiagnosaController;
+use App\Http\Controllers\Admin\DiagnosisController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ReportController;
@@ -43,6 +47,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::get('/diagnosis', [DiagnosisController::class, 'index'])->name('diagnosis.index');
+        Route::get('/diagnosis/{ticket}', [DiagnosisController::class, 'show'])->name('diagnosis.show');
+        Route::post('/diagnosis', [DiagnosisController::class, 'analyze'])->name('diagnosis.analyze');
+
+        Route::get('/diagnosa', [DiagnosaController::class, 'index'])->name('diagnosa.index');
+        Route::get('/diagnosa/{ticket}', [DiagnosaController::class, 'show'])->name('diagnosa.show');
+        Route::post('/diagnosa', [DiagnosaController::class, 'analyze'])->name('diagnosa.analyze');
+
+        Route::get('/ai-settings', [AiSettingController::class, 'show'])->name('ai-settings.show');
+        Route::get('/ai-settings/edit', [AiSettingController::class, 'edit'])->name('ai-settings.edit');
+        Route::get('/ai-settings/index', [AiSettingController::class, 'index'])->name('ai-settings.index');
+        Route::put('/ai-settings', [AiSettingController::class, 'update'])->name('ai-settings.update');
+        Route::post('/ai-settings/test', [AiSettingController::class, 'test'])->name('ai-settings.test');
+
+        Route::get('/ai-provider-settings', [AiProviderSettingController::class, 'show'])->name('ai-provider-settings.show');
+        Route::get('/ai-provider-settings/edit', [AiProviderSettingController::class, 'edit'])->name('ai-provider-settings.edit');
+        Route::get('/ai-provider-settings/index', [AiProviderSettingController::class, 'index'])->name('ai-provider-settings.index');
+        Route::put('/ai-provider-settings', [AiProviderSettingController::class, 'update'])->name('ai-provider-settings.update');
+        Route::post('/ai-provider-settings/test', [AiProviderSettingController::class, 'test'])->name('ai-provider-settings.test');
 
         Route::get('/notifications/poll', [NotificationController::class, 'poll'])->name('notifications.poll');
         Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.readAll');
